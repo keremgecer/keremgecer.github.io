@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alman Usulü - Hesaplayıcı (Final)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding-top: 20px; }
+        .container { background: white; width: 400px; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .section { margin-bottom: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
+        label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-top: 10px; }
+        
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        
+        button { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-blue { background-color: #3498db; color: white; }
+        .btn-blue:hover { background-color: #2980b9; }
+        
+        .btn-green { background-color: #2ecc71; color: white; }
+        .btn-green:hover { background-color: #27ae60; }
+        
+        .btn-purple { background-color: #9b59b6; color: white; }
+        .btn-purple:hover { background-color: #8e44ad; }
+        
+        .btn-red { background-color: #e74c3c; color: white; margin-top: 5px; font-size: 12px; padding: 8px; }
+        
+        .list-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .iban-copy { font-size: 12px; color: blue; cursor: pointer; }
+        
+        .result-box { background-color: #fff3cd; color: #856404; padding: 10px; margin-top: 10px; border-radius: 5px; border-left: 5px solid #ffeeba; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hesap Kitleyici vFinal</h2>
+
+    <div class="section">
+        <label>1. Arkadaş Ekle</label>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="userName" placeholder="İsim">
+            <input type="text" id="userIban" placeholder="IBAN (Opsiyonel)">
+        </div>
+        <button onclick="addUser()" class="btn-blue">Kişiyi Listeye Ekle</button>
+        <div id="userList" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="section">
+        <label>2. Harcama Ekle</label>
+        <select id="payerSelect">
+            <option value="" disabled selected>Önce kişi ekleyin...</option>
+        </select>
+        <input type="number" id="amount" placeholder="Tutar (TL)">
+        <input type="text" id="desc" placeholder="Açıklama (Örn: Kahve)">
+        <button onclick="addExpense()" class="btn-green">Harcamayı Kaydet</button>
+        
+        <div id="expenseList" style="margin-top: 10px; max-height: 150px; overflow-y: auto;"></div>
+        <div style="text-align: right; font-weight: bold; margin-top: 10px;">Toplam: <span id="totalDisplay">0</span> TL</div>
+    </div>
+
+    <div class="section">
+        <button onclick="calculate()" class="btn-purple">HESAPLA: KİM KİME NE KADAR?</button>
+        <div id="resultArea"></div>
+    </div>
+
+    <button onclick="clearAll()" class="btn-red">Tüm Verileri Sıfırla</button>
+</div>
+
+<script>
+    let users = [];
+    let expenses = [];
+
+    window.onload = function() {
+        try {
+            const savedUsers = localStorage.getItem('local_users');
+            const savedExpenses = localStorage.getItem('local_expenses');
+            if(savedUsers) users = JSON.parse(savedUsers);
+            if(savedExpenses) expenses = JSON.parse(savedExpenses);
+        } catch(e) { console.log("Veri okuma hatası, boş başlıyoruz."); }
+        
+        renderAll();
+    };
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text);
+        alert("Kopyalandı: " + text);
+    }
+
+    function addUser() {
+        const nameInput = document.getElementById('userName');
+        const ibanInput = document.getElementById('userIban');
+        
+        if(nameInput.value.trim() === "") {
+            alert("Lütfen bir isim girin!");
+            return;
+        }
+
+        const newUser = {
+            id: Date.now(),
+            name: nameInput.value,
+            iban: ibanInput.value
+        };
+
+        users.push(newUser);
+        saveData();
+        
+        nameInput.value = "";
+        ibanInput.value = "";
+        renderAll();
+    }
+
+    function addExpense() {
+        const payerSelect = document.getElementById('payerSelect');
+        const amountInput = document.getElementById('amount');
+        const descInput = document.getElementById('desc');
+        
+        const payerId = payerSelect.value;
+        const amount = parseFloat(amountInput.value);
+
+        if(!payerId) {
+            alert("Lütfen ödeyen kişiyi seçin!");
+            return;
+        }
+        if(isNaN(amount) || amount <= 0) {
+            alert("Lütfen geçerli bir tutar girin!");
+            return;
+        }
+
+        const newExpense = {
+            payerId: payerId,
+            amount: amount,
+            desc: descInput.value
+        };
+
+        expenses.push(newExpense);
+        saveData();
+
+        amountInput.value = "";
+        descInput.value = "";
+        renderAll();
+    }
+
+    function calculate() {
+        if(users.length === 0) return;
+
+        let total = expenses.reduce((sum, item) => sum + item.amount, 0);
+        let perPerson = total / users.length;
+
+        let balances = {};
+        users.forEach(u => balances[u.id] = -perPerson);
+        
+        expenses.forEach(e => {
+            if(balances[e.payerId] !== undefined) {
+                balances[e.payerId] += e.amount;
+            }
+        });
+
+        let debtors = [];
+        let creditors = [];
+
+        users.forEach(u => {
+            let val = balances[u.id];
+            if(val < -0.01) debtors.push({ id: u.id, amount: val });
+            if(val > 0.01) creditors.push({ id: u.id, amount: val });
+        });
+
+        debtors.sort((a, b) => a.amount - b.amount);
+        creditors.sort((a, b) => b.amount - a.amount);
+
+        let resultHTML = `<div style='text-align:center; margin-bottom:10px;'><b>Kişi Başı: ${perPerson.toFixed(2)} TL</b></div>`;
+        let i = 0;
+        let j = 0;
+
+        while(i < debtors.length && j < creditors.length) {
+            let debt = Math.abs(debtors[i].amount);
+            let credit = creditors[j].amount;
+            let amountToPay = Math.min(debt, credit);
+
+            let debtorName = users.find(u => u.id == debtors[i].id).name;
+            let creditorObj = users.find(u => u.id == creditors[j].id);
+
+            resultHTML += `
+                <div class="result-box">
+                    <div><b>${debtorName}</b> → <b>${creditorObj.name}</b></div>
+                    <div style="font-size:18px; font-weight:bold;">${amountToPay.toFixed(2)} TL</div>
+                </div>
+            `;
+
+            debtors[i].amount += amountToPay;
+            creditors[j].amount -= amountToPay;
+
+            if(Math.abs(debtors[i].amount) < 0.01) i++;
+            if(creditors[j].amount < 0.01) j++;
+        }
+
+        if(expenses.length === 0) resultHTML = "<p style='text-align:center'>Harcama yok.</p>";
+        
+        document.getElementById('resultArea').innerHTML = resultHTML;
+    }
+
+    function renderAll() {
+        const userList = document.getElementById('userList');
+        userList.innerHTML = users.map(u => 
+            `<div class="list-item">
+                <span>${u.name}</span>
+                <span class="iban-copy" onclick="copyText('${u.iban}')">${u.iban ? u.iban : ''}</span>
+            </div>`
+        ).join('');
+
+        const select = document.getElementById('payerSelect');
+        let options = '<option value="" disabled selected>Ödeyen Kişi...</option>';
+        users.forEach(u => {
+            options += `<option value="${u.id}">${u.name}</option>`;
+        });
+        select.innerHTML = options;
+
+        let total = 0;
+        const expList = document.getElementById('expenseList');
+        
+        expList.innerHTML = expenses.slice().reverse().map(e => {
+            total += e.amount;
+            let u = users.find(usr => usr.id == e.payerId);
+            return `<div class="list-item">
+                        <span><b>${u ? u.name : '?'}</b>: ${e.desc}</span>
+                        <span>${e.amount} TL</span>
+                    </div>`;
+        }).join('');
+        
+        document.getElementById('totalDisplay').innerText = total;
+    }
+
+    function saveData() {
+        localStorage.setItem('local_users', JSON.stringify(users));
+        localStorage.setItem('local_expenses', JSON.stringify(expenses));
+    }
+
+    function clearAll() {
+        if(confirm("Her şeyi silmek istediğine emin misin?")) {
+            localStorage.clear();
+            users = [];
+            expenses = [];
+            renderAll();
+            document.getElementById('resultArea').innerHTML = "";
+        }
+    }
+</script>
+
+</body>
+</html>
