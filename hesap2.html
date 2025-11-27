@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alman Usulü - Hesaplayıcı (Final)</title>
+    <title>Alman Usulü - Pro (Seçmeli)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding-top: 20px; }
-        .container { background: white; width: 400px; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding-top: 20px; padding-bottom: 50px; }
+        .container { background: white; width: 450px; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Tab Stilleri */
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-weight: bold; color: #666; border-bottom: 3px solid transparent; }
+        .tab.active { color: #3498db; border-bottom-color: #3498db; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         
         .section { margin-bottom: 20px; padding: 15px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
-        label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-top: 10px; }
+        label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-top: 10px; margin-bottom: 5px; }
         
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
         
@@ -21,86 +29,176 @@
         .btn-green { background-color: #2ecc71; color: white; }
         .btn-green:hover { background-color: #27ae60; }
         
-        .btn-purple { background-color: #9b59b6; color: white; }
+        .btn-purple { background-color: #9b59b6; color: white; font-size: 16px; }
         .btn-purple:hover { background-color: #8e44ad; }
         
-        .btn-red { background-color: #e74c3c; color: white; margin-top: 5px; font-size: 12px; padding: 8px; }
-        
-        .list-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
-        .iban-copy { font-size: 12px; color: blue; cursor: pointer; }
-        
+        .btn-red { background-color: #e74c3c; color: white; margin-top: 5px; font-size: 13px; padding: 10px; }
+        .btn-red:hover { background-color: #c0392b; }
+
+        .btn-gray { background-color: #95a5a6; color: white; font-size: 13px; padding: 8px; margin-top: 5px; }
+        .btn-gray:hover { background-color: #7f8c8d; }
+
+        /* Kişi Listesi Tasarımı */
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .iban-display { font-size: 11px; color: #666; background: #f0f0f0; padding: 3px 6px; border-radius: 4px; margin-left: 5px; word-break: break-all; }
+        .iban-copy { font-size: 11px; color: #3498db; cursor: pointer; background: #e3f2fd; padding: 2px 6px; border-radius: 4px; margin-left: 5px; border: 1px solid #bbdefb; }
+        .delete-user-btn { background: #ffeded; color: red; border: 1px solid #ffcccc; padding: 2px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; margin-left: 10px; width: auto; margin-top: 0; }
+
+        /* Katılımcı Seçimi (Chips) Tasarımı */
+        .chips-container { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .chip { padding: 6px 12px; background: #e0e0e0; border-radius: 20px; font-size: 12px; cursor: pointer; user-select: none; transition: 0.2s; border: 1px solid transparent; }
+        .chip.selected { background: #3498db; color: white; border-color: #2980b9; }
+        .chip:hover { opacity: 0.9; }
+
         .result-box { background-color: #fff3cd; color: #856404; padding: 10px; margin-top: 10px; border-radius: 5px; border-left: 5px solid #ffeeba; }
+        .iban-info { font-size: 11px; color: #2c3e50; margin-top: 5px; padding: 5px; background: #f8f9fa; border-radius: 3px; border-left: 3px solid #3498db; }
+        
+        /* Session Listesi */
+        .session-item { padding: 10px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 10px; background: white; }
+        .session-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+        .session-expenses { font-size: 12px; color: #666; }
+        .session-total { text-align: right; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Hesap Kitleyici vFinal</h2>
+    <h2>Hesap Kitleyici v3</h2>
 
-    <div class="section">
-        <label>1. Arkadaş Ekle</label>
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="userName" placeholder="İsim">
-            <input type="text" id="userIban" placeholder="IBAN (Opsiyonel)">
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('current')">Yeni Harcama</button>
+        <button class="tab" onclick="switchTab('history')">Geçmiş Hesaplar</button>
+        <button class="tab" onclick="switchTab('total')">Toplam Borçlar</button>
+    </div>
+
+    <!-- MEVCUT HESAP TAB'İ -->
+    <div id="current" class="tab-content active">
+        <div class="section">
+            <label>1. Arkadaş Ekle</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="userName" placeholder="İsim">
+                <input type="text" id="userIban" placeholder="IBAN (Opsiyonel)">
+            </div>
+            <button id="addUserBtn" class="btn-blue">Kişiyi Listeye Ekle</button>
+            
+            <div id="userList" style="margin-top: 15px;"></div>
         </div>
-        <button onclick="addUser()" class="btn-blue">Kişiyi Listeye Ekle</button>
-        <div id="userList" style="margin-top: 10px;"></div>
+
+        <div class="section">
+            <label>2. Harcama Ekle</label>
+            <select id="payerSelect">
+                <option value="" disabled selected>Ödeyen kim?</option>
+            </select>
+            
+            <input type="number" id="amount" placeholder="Tutar (TL)">
+            <input type="text" id="desc" placeholder="Açıklama (Örn: Yemek)">
+
+            <label style="margin-top: 15px;">Harcamaya Kimler Dahil?</label>
+            <div style="font-size: 11px; color: #666; margin-bottom: 5px;">(Tıklayarak seç/kaldır)</div>
+            <div id="participantSelectArea" class="chips-container">
+                </div>
+
+            <button id="addExpenseBtn" class="btn-green">Harcamayı Kaydet</button>
+            
+            <div id="expenseList" style="margin-top: 15px; max-height: 150px; overflow-y: auto; border-top: 1px solid #eee; padding-top:5px;"></div>
+            <div style="text-align: right; font-weight: bold; margin-top: 10px;">Toplam: <span id="totalDisplay">0</span> TL</div>
+        </div>
+
+        <div class="section">
+            <button id="calculateBtn" class="btn-purple">HESAPLA: KİM KİME?</button>
+            <div id="resultArea"></div>
+        </div>
+
+        <button id="saveSessionBtn" class="btn-green">Bu Hesabı Kaydet</button>
+        <button id="clearExpensesBtn" class="btn-red">Yeni Hesap Aç (Kişileri Silme)</button>
+        <div style="text-align: center; margin-top: 5px; font-size: 11px; color: #999;">Kişileri silmek için yukarıdaki kırmızı X butonlarını kullanın.</div>
     </div>
 
-    <div class="section">
-        <label>2. Harcama Ekle</label>
-        <select id="payerSelect">
-            <option value="" disabled selected>Önce kişi ekleyin...</option>
-        </select>
-        <input type="number" id="amount" placeholder="Tutar (TL)">
-        <input type="text" id="desc" placeholder="Açıklama (Örn: Kahve)">
-        <button onclick="addExpense()" class="btn-green">Harcamayı Kaydet</button>
-        
-        <div id="expenseList" style="margin-top: 10px; max-height: 150px; overflow-y: auto;"></div>
-        <div style="text-align: right; font-weight: bold; margin-top: 10px;">Toplam: <span id="totalDisplay">0</span> TL</div>
+    <!-- GEÇMİŞ HESAPLAR TAB'İ -->
+    <div id="history" class="tab-content">
+        <div class="section">
+            <h3 style="text-align: center; margin-top: 0;">Kayıtlı Hesaplar</h3>
+            <div id="sessionList"></div>
+        </div>
     </div>
 
-    <div class="section">
-        <button onclick="calculate()" class="btn-purple">HESAPLA: KİM KİME NE KADAR?</button>
-        <div id="resultArea"></div>
+    <!-- TOPLAM BORÇLAR TAB'İ -->
+    <div id="total" class="tab-content">
+        <div class="section">
+            <h3 style="text-align: center; margin-top: 0;">Toplam Borç Durumu</h3>
+            <div id="totalDebtsArea"></div>
+        </div>
     </div>
-
-    <button onclick="clearAll()" class="btn-red">Tüm Verileri Sıfırla</button>
 </div>
 
 <script>
     let users = [];
     let expenses = [];
+    let sessions = [];
 
+    // Sayfa Yüklendiğinde
     window.onload = function() {
         try {
-            const savedUsers = localStorage.getItem('local_users');
-            const savedExpenses = localStorage.getItem('local_expenses');
+            const savedUsers = localStorage.getItem('v3_users');
+            const savedExpenses = localStorage.getItem('v3_expenses');
+            const savedSessions = localStorage.getItem('v3_sessions');
+            
             if(savedUsers) users = JSON.parse(savedUsers);
             if(savedExpenses) expenses = JSON.parse(savedExpenses);
-        } catch(e) { console.log("Veri okuma hatası, boş başlıyoruz."); }
+            if(savedSessions) sessions = JSON.parse(savedSessions);
+        } catch(e) { console.log("Veri hatası"); }
         
         renderAll();
+        
+        // Butonlara event listener'ları ekle
+        document.getElementById('addUserBtn').addEventListener('click', addUser);
+        document.getElementById('addExpenseBtn').addEventListener('click', addExpense);
+        document.getElementById('calculateBtn').addEventListener('click', calculate);
+        document.getElementById('clearExpensesBtn').addEventListener('click', clearExpensesOnly);
+        document.getElementById('saveSessionBtn').addEventListener('click', saveCurrentSession);
     };
 
-    function copyText(text) {
-        navigator.clipboard.writeText(text);
-        alert("Kopyalandı: " + text);
+    // Tab geçiş fonksiyonu
+    function switchTab(tabName) {
+        // Tüm tab içeriklerini gizle
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Tüm tab butonlarını pasif yap
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Seçilen tab'ı aktif yap
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+        
+        // Eğer geçmiş veya toplam tab'ına geçiliyorsa, içeriği güncelle
+        if(tabName === 'history') {
+            renderSessionList();
+        } else if(tabName === 'total') {
+            calculateTotalDebts();
+        }
     }
 
+    function copyText(text) {
+        if(!text) return;
+        navigator.clipboard.writeText(text);
+        alert("IBAN kopyalandı!");
+    }
+
+    // --- KİŞİ İŞLEMLERİ ---
     function addUser() {
         const nameInput = document.getElementById('userName');
         const ibanInput = document.getElementById('userIban');
         
-        if(nameInput.value.trim() === "") {
-            alert("Lütfen bir isim girin!");
-            return;
-        }
+        if(nameInput.value.trim() === "") { alert("İsim giriniz!"); return; }
 
         const newUser = {
             id: Date.now(),
-            name: nameInput.value,
-            iban: ibanInput.value
+            name: nameInput.value.trim(),
+            iban: ibanInput.value.trim()
         };
 
         users.push(newUser);
@@ -111,27 +209,42 @@
         renderAll();
     }
 
+    // Tekil Kişi Silme
+    function deleteUser(id) {
+        if(confirm("Bu kişiyi silmek istediğine emin misin? Harcamalarda adı geçiyorsa hesap şaşabilir.")) {
+            users = users.filter(u => u.id !== id);
+            saveData();
+            renderAll();
+        }
+    }
+
+    // --- HARCAMA İŞLEMLERİ ---
     function addExpense() {
         const payerSelect = document.getElementById('payerSelect');
         const amountInput = document.getElementById('amount');
         const descInput = document.getElementById('desc');
         
-        const payerId = payerSelect.value;
+        const payerId = parseInt(payerSelect.value);
         const amount = parseFloat(amountInput.value);
 
-        if(!payerId) {
-            alert("Lütfen ödeyen kişiyi seçin!");
-            return;
-        }
-        if(isNaN(amount) || amount <= 0) {
-            alert("Lütfen geçerli bir tutar girin!");
+        if(!payerId) { alert("Ödeyen kişiyi seçin!"); return; }
+        if(isNaN(amount) || amount <= 0) { alert("Tutar girin!"); return; }
+
+        // Seçili katılımcıları bul
+        const selectedChips = document.querySelectorAll('.chip.selected');
+        let involvedIds = Array.from(selectedChips).map(chip => parseInt(chip.dataset.id));
+
+        if(involvedIds.length === 0) {
+            alert("Harcamaya en az 1 kişi dahil olmalı!");
             return;
         }
 
         const newExpense = {
+            id: Date.now(),
             payerId: payerId,
             amount: amount,
-            desc: descInput.value
+            desc: descInput.value,
+            involvedIds: involvedIds
         };
 
         expenses.push(newExpense);
@@ -139,91 +252,89 @@
 
         amountInput.value = "";
         descInput.value = "";
-        renderAll();
+        
+        // Seçimleri sıfırla (hiçbiri seçili olmasın)
+        renderParticipantsChips(); 
+        renderExpenseList();
     }
 
-    function calculate() {
-        if(users.length === 0) return;
-
-        let total = expenses.reduce((sum, item) => sum + item.amount, 0);
-        let perPerson = total / users.length;
-
-        let balances = {};
-        users.forEach(u => balances[u.id] = -perPerson);
-        
-        expenses.forEach(e => {
-            if(balances[e.payerId] !== undefined) {
-                balances[e.payerId] += e.amount;
-            }
-        });
-
-        let debtors = [];
-        let creditors = [];
-
-        users.forEach(u => {
-            let val = balances[u.id];
-            if(val < -0.01) debtors.push({ id: u.id, amount: val });
-            if(val > 0.01) creditors.push({ id: u.id, amount: val });
-        });
-
-        debtors.sort((a, b) => a.amount - b.amount);
-        creditors.sort((a, b) => b.amount - a.amount);
-
-        let resultHTML = `<div style='text-align:center; margin-bottom:10px;'><b>Kişi Başı: ${perPerson.toFixed(2)} TL</b></div>`;
-        let i = 0;
-        let j = 0;
-
-        while(i < debtors.length && j < creditors.length) {
-            let debt = Math.abs(debtors[i].amount);
-            let credit = creditors[j].amount;
-            let amountToPay = Math.min(debt, credit);
-
-            let debtorName = users.find(u => u.id == debtors[i].id).name;
-            let creditorObj = users.find(u => u.id == creditors[j].id);
-
-            resultHTML += `
-                <div class="result-box">
-                    <div><b>${debtorName}</b> → <b>${creditorObj.name}</b></div>
-                    <div style="font-size:18px; font-weight:bold;">${amountToPay.toFixed(2)} TL</div>
-                </div>
-            `;
-
-            debtors[i].amount += amountToPay;
-            creditors[j].amount -= amountToPay;
-
-            if(Math.abs(debtors[i].amount) < 0.01) i++;
-            if(creditors[j].amount < 0.01) j++;
-        }
-
-        if(expenses.length === 0) resultHTML = "<p style='text-align:center'>Harcama yok.</p>";
-        
-        document.getElementById('resultArea').innerHTML = resultHTML;
-    }
-
+    // --- UI GÜNCELLEME ---
     function renderAll() {
+        renderUserList();
+        renderPayerSelect();
+        renderParticipantsChips();
+        renderExpenseList();
+    }
+
+    function renderUserList() {
         const userList = document.getElementById('userList');
         userList.innerHTML = users.map(u => 
             `<div class="list-item">
-                <span>${u.name}</span>
-                <span class="iban-copy" onclick="copyText('${u.iban}')">${u.iban ? u.iban : ''}</span>
+                <div style="flex: 1;">
+                    <b>${u.name}</b>
+                    ${u.iban ? `
+                        <div style="margin-top: 3px;">
+                            <span class="iban-display">${u.iban}</span>
+                            <span class="iban-copy" onclick="copyText('${u.iban}')">Kopyala</span>
+                        </div>
+                    ` : ''}
+                </div>
+                <button class="delete-user-btn" onclick="deleteUser(${u.id})">Sil</button>
             </div>`
         ).join('');
+    }
 
+    function renderPayerSelect() {
         const select = document.getElementById('payerSelect');
+        const currentVal = select.value;
+        
         let options = '<option value="" disabled selected>Ödeyen Kişi...</option>';
         users.forEach(u => {
             options += `<option value="${u.id}">${u.name}</option>`;
         });
         select.innerHTML = options;
+        if(currentVal) select.value = currentVal;
+    }
 
+    // Katılımcı Seçim Alanı (Chips) - Başlangıçta seçili olmasın
+    function renderParticipantsChips() {
+        const container = document.getElementById('participantSelectArea');
+        container.innerHTML = users.map(u => 
+            `<div class="chip" onclick="toggleChip(this)" data-id="${u.id}">
+                ${u.name}
+            </div>`
+        ).join('');
+    }
+
+    function toggleChip(el) {
+        el.classList.toggle('selected');
+    }
+
+    function renderExpenseList() {
         let total = 0;
         const expList = document.getElementById('expenseList');
         
         expList.innerHTML = expenses.slice().reverse().map(e => {
             total += e.amount;
-            let u = users.find(usr => usr.id == e.payerId);
-            return `<div class="list-item">
-                        <span><b>${u ? u.name : '?'}</b>: ${e.desc}</span>
+            let payer = users.find(u => u.id == e.payerId);
+            let payerName = payer ? payer.name : 'Silinmiş Kişi';
+            
+            // Katılımcı isimlerini al
+            let involvedNames = [];
+            if(e.involvedIds && e.involvedIds.length > 0) {
+                involvedNames = e.involvedIds.map(id => {
+                    let user = users.find(u => u.id == id);
+                    return user ? user.name : 'Silinmiş Kişi';
+                });
+            }
+            
+            let count = e.involvedIds ? e.involvedIds.length : 0;
+
+            return `<div class="list-item" style="font-size:13px;">
+                        <span>
+                            <b>${payerName}</b> (${e.desc}) 
+                            <span style="color:#888; font-size:11px;">-> ${count} kişi (${involvedNames.join(', ')})</span>
+                        </span>
                         <span>${e.amount} TL</span>
                     </div>`;
         }).join('');
@@ -231,18 +342,269 @@
         document.getElementById('totalDisplay').innerText = total;
     }
 
-    function saveData() {
-        localStorage.setItem('local_users', JSON.stringify(users));
-        localStorage.setItem('local_expenses', JSON.stringify(expenses));
+    // --- HESAPLAMA MOTORU ---
+    function calculate() {
+        if(users.length === 0) return;
+
+        let balances = calculateBalances(expenses);
+        let { debtors, creditors } = separateDebtorsCreditors(balances);
+        let resultHTML = matchDebtorsCreditors(debtors, creditors);
+
+        if(expenses.length === 0) resultHTML = "<p style='text-align:center'>Henüz harcama girilmedi.</p>";
+        else if(resultHTML === "") resultHTML = "<p style='text-align:center; color:green'><b>Herkes ödeşmiş durumda!</b></p>";
+
+        document.getElementById('resultArea').innerHTML = resultHTML;
     }
 
-    function clearAll() {
-        if(confirm("Her şeyi silmek istediğine emin misin?")) {
-            localStorage.clear();
-            users = [];
+    // --- SESSION YÖNETİMİ ---
+    function saveCurrentSession() {
+        if(expenses.length === 0) {
+            alert("Kaydedilecek harcama yok!");
+            return;
+        }
+
+        const sessionName = prompt("Bu hesap için bir isim verin:", 
+            `Hesap_${new Date().toLocaleDateString('tr-TR')}`);
+        
+        if(!sessionName) return;
+
+        const newSession = {
+            id: Date.now(),
+            name: sessionName,
+            date: new Date().toISOString(),
+            users: JSON.parse(JSON.stringify(users)), // Deep copy
+            expenses: JSON.parse(JSON.stringify(expenses)) // Deep copy
+        };
+
+        sessions.push(newSession);
+        localStorage.setItem('v3_sessions', JSON.stringify(sessions));
+        
+        alert("Hesap kaydedildi!");
+        renderSessionList();
+    }
+
+    function renderSessionList() {
+        const sessionList = document.getElementById('sessionList');
+        
+        if(sessions.length === 0) {
+            sessionList.innerHTML = "<p style='text-align:center; color:#666'>Henüz kayıtlı hesap yok.</p>";
+            return;
+        }
+
+        sessionList.innerHTML = sessions.slice().reverse().map(session => {
+            let totalAmount = session.expenses.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            return `<div class="session-item">
+                <div class="session-header">
+                    <span>${session.name}</span>
+                    <span>${new Date(session.date).toLocaleDateString('tr-TR')}</span>
+                </div>
+                <div class="session-expenses">
+                    ${session.expenses.slice(0, 3).map(exp => {
+                        let payer = session.users.find(u => u.id == exp.payerId);
+                        let payerName = payer ? payer.name : 'Silinmiş Kişi';
+                        return `<div>${payerName}: ${exp.amount} TL (${exp.desc})</div>`;
+                    }).join('')}
+                    ${session.expenses.length > 3 ? `<div>... ve ${session.expenses.length - 3} harcama daha</div>` : ''}
+                </div>
+                <div class="session-total">Toplam: ${totalAmount} TL</div>
+                <button class="btn-gray" onclick="loadSession(${session.id})">Bu Hesabı Görüntüle</button>
+                <button class="btn-red" onclick="deleteSession(${session.id})">Sil</button>
+            </div>`;
+        }).join('');
+    }
+
+    function loadSession(sessionId) {
+        const session = sessions.find(s => s.id === sessionId);
+        if(!session) return;
+
+        if(confirm("Mevcut hesap silinecek. Emin misiniz?")) {
+            users = JSON.parse(JSON.stringify(session.users));
+            expenses = JSON.parse(JSON.stringify(session.expenses));
+            saveData();
+            renderAll();
+            switchTab('current');
+            alert("Hesap yüklendi!");
+        }
+    }
+
+    function deleteSession(sessionId) {
+        if(confirm("Bu hesabı silmek istediğinize emin misiniz?")) {
+            sessions = sessions.filter(s => s.id !== sessionId);
+            localStorage.setItem('v3_sessions', JSON.stringify(sessions));
+            renderSessionList();
+        }
+    }
+
+    // --- TOPLAM BORÇ HESAPLAMA ---
+    function calculateTotalDebts() {
+        if(sessions.length === 0) {
+            document.getElementById('totalDebtsArea').innerHTML = 
+                "<p style='text-align:center; color:#666'>Henüz kayıtlı hesap yok.</p>";
+            return;
+        }
+
+        // Tüm session'lardaki harcamaları birleştir
+        let allExpenses = [];
+        sessions.forEach(session => {
+            allExpenses = allExpenses.concat(session.expenses.map(exp => ({
+                ...exp,
+                users: session.users // Bu harcamanın user listesini de sakla
+            })));
+        });
+
+        // Mevcut hesabı da ekle (eğer varsa)
+        if(expenses.length > 0) {
+            allExpenses = allExpenses.concat(expenses.map(exp => ({
+                ...exp,
+                users: users
+            })));
+        }
+
+        // Tüm kullanıcıları topla
+        let allUsers = [];
+        sessions.forEach(session => {
+            session.users.forEach(user => {
+                if(!allUsers.find(u => u.id === user.id)) {
+                    allUsers.push(user);
+                }
+            });
+        });
+        // Mevcut kullanıcıları da ekle
+        users.forEach(user => {
+            if(!allUsers.find(u => u.id === user.id)) {
+                allUsers.push(user);
+            }
+        });
+
+        if(allUsers.length === 0) {
+            document.getElementById('totalDebtsArea').innerHTML = 
+                "<p style='text-align:center; color:#666'>Kullanıcı bulunamadı.</p>";
+            return;
+        }
+
+        let balances = calculateBalances(allExpenses);
+        let { debtors, creditors } = separateDebtorsCreditors(balances);
+        let resultHTML = matchDebtorsCreditors(debtors, creditors, allUsers);
+
+        if(resultHTML === "") {
+            resultHTML = "<p style='text-align:center; color:green'><b>Tüm hesaplar kapalı! Kimsenin borcu yok.</b></p>";
+        }
+
+        document.getElementById('totalDebtsArea').innerHTML = resultHTML;
+    }
+
+    // --- ORTAK FONKSİYONLAR ---
+    function calculateBalances(expensesArray) {
+        let balances = {};
+        let allUsers = users; // Varsayılan olarak mevcut kullanıcıları kullan
+
+        // Eğer expensesArray'de users bilgisi varsa, onları kullan
+        if(expensesArray.length > 0 && expensesArray[0].users) {
+            allUsers = expensesArray[0].users;
+        }
+
+        allUsers.forEach(u => balances[u.id] = 0);
+
+        expensesArray.forEach(e => {
+            let currentUsers = e.users || allUsers;
+
+            // Ödeyen kişi
+            if(balances[e.payerId] !== undefined) {
+                balances[e.payerId] += e.amount;
+            }
+
+            // Harcamaya dahil olanlar
+            let involved = e.involvedIds;
+            if(!involved || involved.length === 0) involved = currentUsers.map(u => u.id);
+
+            let perPersonShare = e.amount / involved.length;
+
+            involved.forEach(uid => {
+                if(balances[uid] !== undefined) {
+                    balances[uid] -= perPersonShare;
+                }
+            });
+        });
+
+        return balances;
+    }
+
+    function separateDebtorsCreditors(balances) {
+        let debtors = [];
+        let creditors = [];
+
+        for (const [uid, amount] of Object.entries(balances)) {
+            if (amount < -0.01) debtors.push({ id: parseInt(uid), amount: amount });
+            if (amount > 0.01) creditors.push({ id: parseInt(uid), amount: amount });
+        }
+
+        debtors.sort((a, b) => a.amount - b.amount);
+        creditors.sort((a, b) => b.amount - a.amount);
+
+        return { debtors, creditors };
+    }
+
+    function matchDebtorsCreditors(debtors, creditors, userList = users) {
+        let resultHTML = "";
+        let i = 0;
+        let j = 0;
+
+        while(i < debtors.length && j < creditors.length) {
+            let debtorObj = debtors[i];
+            let creditorObj = creditors[j];
+
+            let debt = Math.abs(debtorObj.amount);
+            let credit = creditorObj.amount;
+
+            let amountToPay = Math.min(debt, credit);
+
+            let dUser = userList.find(u => u.id == debtorObj.id);
+            let cUser = userList.find(u => u.id == creditorObj.id);
+
+            if(dUser && cUser) {
+                resultHTML += `
+                <div class="result-box">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><b>${dUser.name}</b> <small>gönderiyor</small></span>
+                        <span><b>${cUser.name}</b> <small>alıyor</small></span>
+                    </div>
+                    <div style="font-size:20px; font-weight:bold; text-align:center; margin:5px 0;">
+                        ${amountToPay.toFixed(2)} TL
+                    </div>
+                    ${cUser.iban ? `
+                        <div class="iban-info">
+                            <strong>${cUser.name}'ın IBAN'ı:</strong> ${cUser.iban}
+                            <span class="iban-copy" onclick="copyText('${cUser.iban}')" style="margin-left: 8px;">Kopyala</span>
+                        </div>
+                    ` : ''}
+                </div>`;
+            }
+
+            // Bakiyeleri güncelle
+            debtors[i].amount += amountToPay;
+            creditors[j].amount -= amountToPay;
+
+            if(Math.abs(debtors[i].amount) < 0.01) i++;
+            if(creditors[j].amount < 0.01) j++;
+        }
+
+        return resultHTML;
+    }
+
+    function saveData() {
+        localStorage.setItem('v3_users', JSON.stringify(users));
+        localStorage.setItem('v3_expenses', JSON.stringify(expenses));
+    }
+
+    // Sadece Harcamaları Sil
+    function clearExpensesOnly() {
+        if(confirm("Kişiler kalacak, sadece harcamalar ve hesaplamalar silinecek. Emin misiniz?")) {
             expenses = [];
+            localStorage.setItem('v3_expenses', JSON.stringify([]));
             renderAll();
             document.getElementById('resultArea').innerHTML = "";
+            alert("Yeni hesap açıldı!");
         }
     }
 </script>
